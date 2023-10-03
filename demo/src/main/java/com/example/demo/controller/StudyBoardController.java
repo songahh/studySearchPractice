@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -20,12 +21,19 @@ public class StudyBoardController {
     private final StudyBoardService boardService;
 
     @GetMapping("/board")
-    public ResponseEntity<Page<StudyBoardDto>> findAllStudyBoardsByCategory(@PageableDefault(size=10) Pageable pageable,
+    public String findAllStudyBoardsByCategory(Model model,
+                                                                            @PageableDefault(size=10) Pageable pageable,
                                                                             @RequestParam(value="col",required=false) String orderByCol,
                                                                             @RequestParam(value="query", required=false) String query){
         StudyBoardSearchDto searchDto = new StudyBoardSearchDto(orderByCol, query);
         Page<StudyBoardDto> responseDto = boardService.findAllStudyBoardsByCategory(pageable, searchDto);
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        model.addAttribute("result", responseDto);
+        return "/index.html";
     }
+
+//    @RequestMapping("/")
+//    public String hello(){
+//        return "/index.html";
+//    }
 
 }
