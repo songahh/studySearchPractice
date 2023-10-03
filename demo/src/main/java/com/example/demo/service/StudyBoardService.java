@@ -1,10 +1,11 @@
 package com.example.demo.service;
 
-import com.example.demo.domain.StudyBoard;
-
-import java.util.List;
+import com.example.demo.domain.dto.StudyBoardDto;
+import com.example.demo.domain.dto.StudyBoardSearchDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface StudyBoardService {
 
-    List<StudyBoard> searchAll();
+    Page<StudyBoardDto> findAllStudyBoardsByCategory(Pageable pageable, StudyBoardSearchDto searchDto);
 }

@@ -7,6 +7,7 @@ import org.hibernate.annotations.ColumnDefault;
 import javax.persistence.*;
 
 @Entity
+@Table(name = "study_board")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,8 +19,9 @@ public class StudyBoard extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
-    private User writer;
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    private User user;
 
     @Column(nullable = false)
     private String subject;
