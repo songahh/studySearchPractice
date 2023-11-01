@@ -1,6 +1,7 @@
 package com.example.demo.domain;
 
 import com.example.demo.config.BaseTimeEntity;
+import java.util.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
@@ -41,5 +42,7 @@ public class StudyBoard extends BaseTimeEntity {
     @ColumnDefault("false")
     private Boolean open;
 
+    @OneToMany(mappedBy = "studyBoard", cascade = CascadeType.PERSIST, fetch=FetchType.LAZY)
+    private List<Tag> hashTagList;
 
 }

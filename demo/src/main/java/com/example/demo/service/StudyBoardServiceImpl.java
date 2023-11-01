@@ -21,7 +21,7 @@ public class StudyBoardServiceImpl implements StudyBoardService{
 
     @Transactional
     @Override
-    public Page<StudyBoardDto> findAllStudyBoardsByCategory(Pageable pageable, StudyBoardSearchDto searchDto) {
+    public Page<StudyBoardDto> findAllStudyBoards(Pageable pageable, StudyBoardSearchDto searchDto) {
         Page<StudyBoardDto> responseDto = boardRepository.findAllStudyBoardsByCategory(pageable, searchDto);
         return responseDto;
     }

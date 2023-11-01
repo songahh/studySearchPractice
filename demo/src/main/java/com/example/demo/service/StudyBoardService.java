@@ -7,5 +7,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface StudyBoardService {
 
-    Page<StudyBoardDto> findAllStudyBoardsByCategory(Pageable pageable, StudyBoardSearchDto searchDto);
+    Page<StudyBoardDto> findAllStudyBoards(Pageable pageable, StudyBoardSearchDto searchDto);
+
+
 }
