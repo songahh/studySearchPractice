@@ -18,16 +18,16 @@ public class StudyBoardController {
 
     private final StudyBoardService boardService;
 
-    @GetMapping("/board")
-    public String findAllStudyBoardsByCategory(Model model,
-                                                                            @PageableDefault(size=10) Pageable pageable,
-                                                                            @RequestParam(value="col",required=false) String orderByCol,
-                                                                            @RequestParam(value="query", required=false) String query){
-        StudyBoardSearchDto searchDto = new StudyBoardSearchDto(orderByCol, query);
-        Page<StudyBoardDto> responseDto = boardService.findAllStudyBoardsByCategory(pageable, searchDto);
-        model.addAttribute("result", responseDto);
-        return "/index.html";
-    }
+//    @GetMapping("/board")
+//    public String findAllStudyBoardsByCategory(Model model,
+//                                                                            @PageableDefault(size=10) Pageable pageable,
+//                                                                            @RequestParam(value="col",required=false) String orderByCol,
+//                                                                            @RequestParam(value="query", required=false) String query){
+//        StudyBoardSearchDto searchDto = new StudyBoardSearchDto(orderByCol, query);
+//        Page<StudyBoardDto> responseDto = boardService.findAllStudyBoardsByCategory(pageable, searchDto);
+//        model.addAttribute("result", responseDto);
+//        return "/index.html";
+//    }
 
 //    @RequestMapping("/")
 //    public String hello(){

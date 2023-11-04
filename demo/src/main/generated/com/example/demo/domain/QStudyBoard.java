@@ -29,6 +29,8 @@ public class QStudyBoard extends EntityPathBase<StudyBoard> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdDate = _super.createdDate;
 
+    public final ListPath<Tag, QTag> hashTagList = this.<Tag, QTag>createList("hashTagList", Tag.class, QTag.class, PathInits.DIRECT2);
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final NumberPath<Integer> likeCnt = createNumber("likeCnt", Integer.class);
