@@ -38,5 +38,11 @@ input{
     white-space: nowrap;
     padding: 10px 10px;
     margin: 0px 5px;
+    color: #7C7C7C;
     background-color: #ECE8DD;
+}
+
+.tag_area{
+    display: flex;
+    flex-wrap: nowrap;
 }
