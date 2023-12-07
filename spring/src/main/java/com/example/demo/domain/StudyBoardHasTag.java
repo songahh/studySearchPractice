@@ -17,12 +17,10 @@ public class StudyBoardHasTag {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @Column(name = "study_board_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "study_board_id")
     private StudyBoard studyBoard;
 
-//    @Column(name = "tag_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tag_id")
     private Tag tag;

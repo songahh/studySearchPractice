@@ -1,11 +1,8 @@
 package com.example.demo.service;
 
-import com.example.demo.domain.dto.StudyBoardDto;
-import com.example.demo.domain.dto.StudyBoardSearchDto;
+import com.example.demo.domain.dto.StudyBoardSearchRequestDto;
+import com.example.demo.domain.dto.StudyBoardSearchResponseDto;
 import com.example.demo.repository.QStudyBoardRepository;
-import com.example.demo.repository.StudyBoardRepository;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,13 +14,13 @@ import javax.transaction.Transactional;
 @RequiredArgsConstructor
 public class StudyBoardServiceImpl implements StudyBoardService{
 
-    private final QStudyBoardRepository boardRepository;
+    private final QStudyBoardRepository qbr;
+
 
     @Transactional
     @Override
-    public Page<StudyBoardDto> findAllStudyBoards(Pageable pageable, StudyBoardSearchDto searchDto) {
-        Page<StudyBoardDto> responseDto = boardRepository.findAllStudyBoardsByCategory(pageable, searchDto);
+    public Page<StudyBoardSearchResponseDto> findAll(Pageable pageable, StudyBoardSearchRequestDto searchDto) {
+        Page<StudyBoardSearchResponseDto> responseDto = qbr.findAll(pageable, searchDto);
         return responseDto;
     }
-
 }

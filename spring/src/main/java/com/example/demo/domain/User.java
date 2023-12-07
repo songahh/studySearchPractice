@@ -5,7 +5,6 @@ import lombok.*;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 
 @Entity
 @Builder
@@ -21,4 +20,7 @@ public class User {
 
     @Column(name = "user_nickname", nullable = false)
     private String nickName;
+
+    @Column(name = "user_img")
+    private String img;
 }

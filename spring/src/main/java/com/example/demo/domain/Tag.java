@@ -3,6 +3,7 @@ package com.example.demo.domain;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -19,7 +20,9 @@ public class Tag {
     @Column(name="tag_id", nullable = false)
     private Long tagId;
 
-    @Column(name="tag_nane", nullable = false)
-    private Long tagName;
+    @Column(name="tag_name", unique = true, nullable = false)
+    private String tagName;
 
+    @OneToMany(mappedBy = "id", cascade = CascadeType.PERSIST, fetch=FetchType.LAZY)
+    private List<StudyBoard> boardList = new ArrayList<>();
 }

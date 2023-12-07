@@ -39,7 +39,7 @@ public class StudyBoard extends BaseTimeEntity {
     private Integer viewCnt;
 
     @Column(nullable = false)
-    @ColumnDefault("false")
+    @ColumnDefault("true")
     private Boolean open;
 
     @OneToMany(mappedBy = "tagId", cascade = CascadeType.PERSIST, fetch=FetchType.LAZY)
