@@ -9,8 +9,9 @@ const openTabContent = ref(null)
 const closedTabContent = ref(null)
 const openTab = ref(null)
 const closedTab = ref(null)
+const isOpen = ref(true)
 
-function clickTab(clicked, unclickedContent) {
+function clickTab(open) {
   openTab.value.classList.remove(
     'border-blue-400',
     'border-b-4',
@@ -29,30 +30,56 @@ function clickTab(clicked, unclickedContent) {
   )
   closedTabContent.value.classList.remove('hidden')
 
-  clicked.classList.add('border-blue-400', 'border-b-4', '-mb-px', 'opacity-100')
-  if (unclickedContent == openTabContent.value) {
-    openTab.value.classList.add('opacity-50')
-  } else {
-    closedTab.value.classList.add('opacity-50')
+  let clicked = openTab.value
+  let unclicked = closedTab.value
+  let unclickedContent = closedTabContent.value
+  isOpen.value = true
+  if (!open) {
+    clicked = closedTab.value
+    unclicked = openTab.value
+    unclickedContent = openTabContent.value
+    isOpen.value = false
   }
+
+  clicked.classList.add('border-blue-400', 'border-b-4', '-mb-px', 'opacity-100')
+  unclicked.classList.add('opacity-50')
   unclickedContent.classList.add('hidden')
-  console.log(clicked)
 }
 /******************************************************************/
 
 /****************************  search  *****************************/
 const searchInput = ref('')
+const wordstr = ref('')
 const tagbox = ref([])
-function onPressSpace() {
-  /* Space를 눌렀을 때
-   * 1. 단어의 첫 글자가 #으로 시작하면, 태그 만들기
-   *  - 태그박스로 만들고, tagbox에 추가 후 tagarea에 보여주기
-   *  - #으로 시작하는 단어 삭제시키기
-   */
-}
 
-function onPressEnter(event) {
-  event.preventDefault()
+const body = ref({
+  word: '',
+  tags: [],
+  orderby: 'latest',
+  open: true
+})
+
+function onPressEnter() {
+  console.log(`searchInput............`, searchInput.value)
+  // word, tag split
+  const words = searchInput.value.split(' ')
+  words.forEach((word) => {
+    if (word[0] == '#') {
+      tagbox.value.push(word.substring(1))
+    } else {
+      wordstr.value = wordstr.value.concat(word, ' ')
+    }
+  })
+
+  console.log(`wordstr..................`, wordstr.value)
+  console.log(`tagbox...................`, tagbox.value)
+  // request body 구성
+  body.value.word = wordstr.value
+  body.value.tags = tagbox.value
+  body.value.open = isOpen.value
+  //body.value.orderby = latest
+
+  // axios post 요청
 }
 
 /******************************************************************/
@@ -165,10 +192,10 @@ const pageInfo = ref({
           class="px-4 py-2 -mb-px font-semibold text-gray-800 border-b-2 border-blue-400 rounded-t opacity-100"
           ref="openTab"
         >
-          <a href="#open" @click="clickTab(openTab, closedTabContent)">모집중</a>
+          <a href="#open" @click="clickTab(true)">모집중</a>
         </li>
         <li class="px-4 py-2 font-semibold text-gray-800 rounded-t opacity-50" ref="closedTab">
-          <a href="#closed" @click="clickTab(closedTab, openTabContent)">모집완료</a>
+          <a href="#closed" @click="clickTab(false)">모집완료</a>
         </li>
       </ul>
 
@@ -182,9 +209,8 @@ const pageInfo = ref({
                 type="text"
                 class="w-full backdrop-blur-sm bg-white/20 py-2 pl-10 pr-4 rounded-lg focus:outline-none border-2 border-gray-100 focus:border-violet-300 transition-colors duration-300"
                 placeholder="검색어를 입력하세요."
-                :value="searchInput"
-                @keyup.space="onPressSpace"
-                @keyup.enter="onPressEnter(event)"
+                v-model="searchInput"
+                @keyup.enter="onPressEnter"
               />
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg
@@ -205,8 +231,8 @@ const pageInfo = ref({
               </div>
             </div>
           </div>
-          <!-- 정렬 tab -->
-          <div class="w-full">
+          <!-- 정렬 tab & 게시글 작성 -->
+          <div class="w-full flex justify-between">
             <ul class="flex items-center gap-2 text-sm font-medium">
               <li class="flex-0.2">
                 <a
@@ -233,6 +259,23 @@ const pageInfo = ref({
                 </a>
               </li>
             </ul>
+            <button
+              class="flex items-center text-sm center relative inline-block select-none whitespace-nowrap rounded-lg bg-blue-500 py-2 px-3.5 align-baseline font-sans font-bold uppercase leading-none text-white"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="15"
+                height="15"
+                fill="currentColor"
+                class="bi bi-pencil me-1"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"
+                />
+              </svg>
+              모집하기
+            </button>
           </div>
           <!-- 게시글 -->
           <div class="flex w-full min-h-screen items-start justify-center bg-white">
