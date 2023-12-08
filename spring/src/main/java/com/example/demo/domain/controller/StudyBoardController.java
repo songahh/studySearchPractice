@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/study")
+@CrossOrigin({"http://localhost:5173/"})
 @Slf4j
 public class StudyBoardController {
 
@@ -30,9 +31,9 @@ public class StudyBoardController {
         return  new ResponseEntity<String>(e.getMessage(), e.getStatus());
     }
 
-    @PostMapping("/list")
+    @GetMapping("/list")
     public ResponseEntity<?> findAll(@PageableDefault(size=7) Pageable pageable,
-                                     @RequestBody StudyBoardSearchRequestDto params){
+                                     StudyBoardSearchRequestDto params){
         log.info("page, params...........{}, {}", pageable, params);
         Page<StudyBoardSearchResponseDto> responseDto = boardService.findAll(pageable, params);
         HttpHeaders headers = new HttpHeaders();

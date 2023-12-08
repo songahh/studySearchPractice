@@ -14,5 +14,5 @@ public class StudyBoardSearchRequestDto {
     private String word;
     private String orderby;
     private Boolean open;
-    private List<String> tags = new ArrayList<>();
+    private List<String> tags;
 }
