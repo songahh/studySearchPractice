@@ -42,6 +42,6 @@ public class StudyBoard extends BaseTimeEntity {
     private Boolean open;
 
     @OneToMany(mappedBy = "tagId", cascade = CascadeType.PERSIST, fetch=FetchType.LAZY)
-    private List<Tag> hashTagList;
+    private Set<Tag> hashTagList;
 
 }

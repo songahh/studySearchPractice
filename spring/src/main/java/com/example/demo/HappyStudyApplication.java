@@ -1,5 +1,9 @@
 package com.example.demo;
 
+import com.example.demo.domain.entity.StudyBoard;
+import com.example.demo.domain.entity.StudyBoardHasTag;
+import com.example.demo.domain.entity.Tag;
+import com.example.demo.domain.entity.User;
 import com.example.demo.domain.repository.StudyBoardHasTagRepository;
 import com.example.demo.domain.repository.StudyBoardRepository;
 import com.example.demo.domain.repository.TagRepository;
@@ -9,12 +13,15 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
+import javax.annotation.PostConstruct;
+import java.util.Random;
+
 @EnableJpaAuditing
 @SpringBootApplication
 @RequiredArgsConstructor
 public class HappyStudyApplication {
 
-	//데이터 야매 저장용
+//	데이터 야매 저장용
 //	private final StudyBoardRepository sbr;
 //	private final StudyBoardHasTagRepository sbhtr;
 //	private final TagRepository tr;
@@ -48,17 +55,23 @@ public class HappyStudyApplication {
 //			User yk = ur.findById("yk").get();
 //			User mj = ur.findById("mj").get();
 //
+//			Random random = new Random();
 //			for(int i=1; i<10; ++i){
-//				sbr.save(StudyBoard.builder().user(sa).subject("스터디 모집합니다" + i).content("빠샤빠샤 헤헤헤헤").likeCnt(0).viewCnt(0).open(true).build());
+//				sbr.save(StudyBoard.builder().user(sa).subject("새 게시글입니다용" + i).content("어질어질").likeCnt(random.nextInt(40)).viewCnt(random.nextInt(40)).open(false).build());
 //				sbr.save(StudyBoard.builder().user(yk).subject("스터디 할 사람~~" + i).content("빠샤빠샤").likeCnt(0).viewCnt(0).open(false).build());
 //				sbr.save(StudyBoard.builder().user(hj).subject("사람 뽑습니다" + i).content("빠샤빠샤 흐흐흐흐").likeCnt(0).viewCnt(0).open(true).build());
 //				sbr.save(StudyBoard.builder().user(mj).subject("모집모집" + i).content("빠샤빠샤 호잇호잇").likeCnt(0).viewCnt(0).open(false).build());
 //			}
 //
-//			for(int i=79; i<115; ++i){
+//			for(int i=115; i<125; ++i){
 //				sbhtr.save(StudyBoardHasTag.builder().studyBoard(sbr.findById((long)i).get())
 //						.tag(tr.findById((long)i%5+1).get()).build());
+//				sbhtr.save(StudyBoardHasTag.builder().studyBoard(sbr.findById((long)i).get())
+//						.tag(tr.findById((long)i%5+2).get()).build());
+//				sbhtr.save(StudyBoardHasTag.builder().studyBoard(sbr.findById((long)i).get())
+//						.tag(tr.findById((long)i%5+3).get()).build());
 //			}
+//
 //
 //	}
 

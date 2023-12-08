@@ -10,17 +10,42 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class QStudyBoardRepository {
     private final JPAQueryFactory queryFactory;
+
+    private Long countAll(Pageable pageable, StudyBoardSearchRequestDto searchDto, Set<String> tagList){
+        QStudyBoard studyBoard = QStudyBoard.studyBoard;
+        QStudyBoardHasTag studyBoardHasTag = QStudyBoardHasTag.studyBoardHasTag;
+        QUser user = QUser.user;
+        QTag tag = QTag.tag;
+
+        Long totalPage = queryFactory.selectFrom(studyBoard)
+                .join(user).on(studyBoard.user.id.eq(user.id))
+                .join(studyBoardHasTag).on(studyBoard.id.eq(studyBoardHasTag.studyBoard.id))
+                .join(tag).on(tag.tagId.eq(studyBoardHasTag.tag.tagId))
+                .where(
+                        isOpen(searchDto.getOpen()),
+                        containsTagInTagList(tagList),
+                        containsQuery(searchDto.getWord())
+                )
+                .groupBy(studyBoard.id)
+                .having(checkTagSize(tagList))
+                .fetchCount();
+
+        return totalPage;
+    }
 
     public Page<StudyBoardSearchResponseDto> findAll(Pageable pageable, StudyBoardSearchRequestDto searchDto){
 
@@ -28,6 +53,8 @@ public class QStudyBoardRepository {
         QStudyBoardHasTag studyBoardHasTag = QStudyBoardHasTag.studyBoardHasTag;
         QUser user = QUser.user;
         QTag tag = QTag.tag;
+
+        Set<String> tagList = searchDto.getTagList();
 
         JPAQuery<StudyBoardSearchResponseDto> query = queryFactory.select(Projections.constructor(StudyBoardSearchResponseDto.class,
                 studyBoard.id.as("id"), user.id.as("userId"), user.nickName.as("nickName"), studyBoard.createdDate.as("createdTime")
@@ -41,11 +68,11 @@ public class QStudyBoardRepository {
                 .join(tag).on(tag.tagId.eq(studyBoardHasTag.tag.tagId))
                 .where(
                         isOpen(searchDto.getOpen()),
-                        containsTagInTagList(searchDto.getTags()),
+                        containsTagInTagList(tagList),
                         containsQuery(searchDto.getWord())
                 )
                 .groupBy(studyBoard.id)
-                .having(checkTagSize(searchDto.getTags()))
+                .having(checkTagSize(tagList))
                 .orderBy(
                         getPath(searchDto.getOrderby())
                 )
@@ -54,14 +81,16 @@ public class QStudyBoardRepository {
                 .limit(pageable.getPageSize());
 
         List<StudyBoardSearchResponseDto> responseDto = query.fetch();
-        return new PageImpl<>(responseDto, pageable, responseDto.size());
+        Long totalPage = countAll(pageable, searchDto, tagList);
+        log.info("StudyBoard findAll 결과.............{},{}", responseDto,totalPage);
+        return new PageImpl<>(responseDto, pageable, totalPage);
     }
 
-    private BooleanExpression checkTagSize(List<String> taglist){
-        if (taglist==null || taglist.isEmpty()) {
+    private BooleanExpression checkTagSize(Set<String> tagList){
+        if (tagList==null || tagList.isEmpty()) {
             return null;
         }
-        return Expressions.numberTemplate(Integer.class, "count(distinct {0})", QTag.tag.tagName).eq(taglist.size());
+        return Expressions.numberTemplate(Integer.class, "count(distinct {0})", QTag.tag.tagName).eq(tagList.size());
     }
 
     private OrderSpecifier getPath(String column){
@@ -74,7 +103,7 @@ public class QStudyBoardRepository {
         return QStudyBoard.studyBoard.open.eq(open);
     }
 
-    private BooleanExpression containsTagInTagList(List<String> taglist){
+    private BooleanExpression containsTagInTagList(Set<String> taglist){
         if (taglist==null || taglist.isEmpty()) {
             return null;
         }

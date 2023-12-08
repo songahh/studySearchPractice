@@ -27,7 +27,7 @@ public class StudyBoardController {
 
     @ExceptionHandler({StudyBoardException.class})
     public ResponseEntity<String> handleException(StudyBoardException e){
-        log.debug("StudyBoard 에러 발생: {}", e.getMessage());
+        log.info("StudyBoard 에러 발생: {}", e.getMessage());
         return  new ResponseEntity<String>(e.getMessage(), e.getStatus());
     }
 
