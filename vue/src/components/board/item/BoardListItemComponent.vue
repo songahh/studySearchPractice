@@ -7,10 +7,31 @@ const openOrClosed = ref('모집중')
 if (!props.item.open) openOrClosed.value = '모집완료'
 
 function dateConverter() {
-  // 1시간 이내 -> *분 전
-  // 24시간 이내 ->  *시간 전
-  // 1주일 이내 -> *일 전
-  //
+  let p = props.item.createdTime //2023-12-07T20:49:07
+  const createdDate = ref('')
+  let pdatetime = p.split('T')
+  p = new Date(pdatetime[0].concat(' ', pdatetime[1]))
+
+  let c = new Date()
+
+  let diff = c.getTime() - p.getTime()
+
+  if (diff < 1000 * 60) {
+    createdDate.value = '방금 전'
+  } else if (diff < 1000 * 60 * 60) {
+    createdDate.value = Math.floor((60 * diff) / (1000 * 60 * 60)) + '분 전'
+  } else if (diff < 1000 * 60 * 60 * 24) {
+    createdDate.value = Math.floor((24 * diff) / (1000 * 60 * 60 * 24)) + '시간 전'
+  } else if (diff < 1000 * 60 * 60 * 24 * 7) {
+    createdDate.value = Math.floor((7 * diff) / (1000 * 60 * 60 * 24 * 7)) + '일 전'
+  } else {
+    let split = pdatetime[0].split('-')
+    let year = split[0]
+    let month = split[1]
+    let date = split[2]
+    createdDate.value = year + '.' + month + '.' + date
+  }
+  return createdDate.value
 }
 </script>
 
@@ -24,7 +45,7 @@ function dateConverter() {
             alt="프로필 이미지"
             :src="item.userImg"
           />
-          {{ item.nickname }} ・ {{ item.createdTime }}</span
+          {{ item.nickname }} ・ {{ dateConverter() }}</span
         >
       </div>
       <div class="flex flex-col">

@@ -16,11 +16,39 @@ const openTabList = [otab, ctab]
 const cdtab = ref(null)
 const lctab = ref(null)
 const vctab = ref(null)
-const sortTabInfo = ['createdDate', 'likeCnt', 'viewCnt']
-const sortTabList = [cdtab, lctab, vctab]
+const sortTabInfo = ['createdDate', 'viewCnt', 'likeCnt']
+const sortTabList = [cdtab, vctab, lctab]
 
 const openNo = ref(0)
 const sortingNo = ref(0)
+
+const searchedList = ref([])
+
+const pageInfo = ref({
+  currPage: 0,
+  totalPage: 0
+})
+
+const searchInput = ref('')
+const wordstr = ref('')
+const tagstr = ref('')
+
+const params = ref({
+  page: 0,
+  word: null,
+  tags: [],
+  orderby: 'createdDate', //likeCnt, viewCnt
+  open: true
+})
+
+function init() {
+  searchInput.value = ''
+  wordstr.value = ''
+  tagstr.value = ''
+  sortingNo.value = 0
+  pageInfo.value.currPage = 0
+  pageInfo.value.totalPage = 0
+}
 
 function clickOpenTab(open) {
   // console.log(`openTabList, open, ........`, openTabList, open)
@@ -37,11 +65,13 @@ function clickOpenTab(open) {
   openNo.value = open
   openTabList[open].value.classList.add('border-blue-400', 'border-b-4', '-mb-px', 'opacity-100')
   openTabList[open ^ 1].value.classList.add('opacity-50')
-
+  init()
   load()
 }
 
 function clickSortingTab(sort) {
+  pageInfo.value.currPage = 0
+  pageInfo.value.totalPage = 0
   sortTabList.forEach((tab) => tab.value.classList.remove('bg-gray-200', 'text-gray-700'))
 
   sortingNo.value = sort
@@ -53,64 +83,53 @@ function clickSortingTab(sort) {
 }
 /******************************************************************/
 
-/****************************  list  *****************************/
-const searchedList = ref([])
-
-const pageInfo = ref({
-  currPage: 0,
-  totalPage: 0
-})
-/******************************************************************/
-
 /****************************  search  *****************************/
-const searchInput = ref('')
-const wordstr = ref('')
-const tagbox = ref([])
-
-const params = ref({
-  page: 0,
-  word: null,
-  tags: [],
-  orderby: 'createdDate', //likeCnt, viewCnt
-  open: true
-})
-
 function onPressEnter() {
   console.log(`searchInput............`, searchInput.value)
   // word, tag split
+  wordstr.value = ''
+  tagstr.value = ''
+  pageInfo.value.currPage = 0
+  pageInfo.value.totalPage = 0
   const words = searchInput.value.split(' ')
   words.forEach((word) => {
     if (word[0] == '#') {
-      tagbox.value.push(word.substring(1))
+      tagstr.value = tagstr.value.concat(word)
     } else {
       wordstr.value = wordstr.value.concat(word, ' ')
     }
   })
+  wordstr.value = wordstr.value.substring(0, wordstr.value.length - 1)
 
   console.log(`wordstr..................`, wordstr.value)
-  console.log(`tagbox...................`, tagbox.value)
+  console.log(`tagstr...................`, tagstr.value)
 
   // axios 요청
+  load()
+}
+/****************************  list  *****************************/
+function onMovePage(currPage) {
+  pageInfo.value.currPage = currPage.value
   load()
 }
 
 function load() {
   params.value.word = wordstr.value
-  params.value.tags = tagbox.value
+  params.value.tags = tagstr.value
   params.value.page = pageInfo.value.currPage
   params.value.orderby = sortTabInfo[sortingNo.value]
   params.value.open = openTabInfo[openNo.value]
-
+  console.log(params.value)
   listBoard(
     params.value,
     ({ data }) => {
-      console.log(data)
+      //console.log(data.totalPages)
       searchedList.value = data.content
       pageInfo.value.currPage = data.pageable.pageNumber
-      pageInfo.value.totalPage = data.pageable.pageSize
+      pageInfo.value.totalPage = data.totalPages
     },
     (error) => {
-      console.log(error)
+      console.log(error.response.data)
     }
   )
 }
@@ -179,13 +198,13 @@ load()
             </li>
             <li
               class="flex-0.2 flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-gray-500 active:bg-gray-50 active:text-gray-700"
-              ref="lctab"
+              ref="vctab"
             >
               <button @click="clickSortingTab(1)">조회순</button>
             </li>
             <li
               class="flex-0.2 flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-gray-500 active:bg-gray-50 active:text-gray-700"
-              ref="vctab"
+              ref="lctab"
             >
               <button @click="clickSortingTab(2)">즐겨찾기순</button>
             </li>
@@ -211,8 +230,11 @@ load()
 
         <!-- 게시글 -->
         <div ref="tabContent">
-          <div class="flex w-full min-h-screen items-start justify-center bg-white">
-            <div class="p-6 w-full overflow-y-scroll overflow-x-hidden px-0">
+          <div class="flex w-full items-start justify-center bg-white">
+            <div
+              class="p-6 w-full min-h-screen overflow-y-scroll overflow-x-hidden px-0"
+              v-if="searchedList.length > 0"
+            >
               <table class="border-collapse border-y w-full table-auto text-left">
                 <tbody>
                   <BoardListItemComponent
@@ -222,7 +244,20 @@ load()
                   />
                 </tbody>
               </table>
-              <PaginationComponent :pageInfo="pageInfo" />
+              <PaginationComponent :pageInfo="pageInfo" @currPage="onMovePage" />
+            </div>
+            <div
+              class="p-6 w-full border my-4 flex justify-center items-center"
+              style="height: 60vh"
+              v-else
+            >
+              <h2 class="text-2xl font-bold">등록된 게시글이 없습니다.</h2>
+              <img
+                src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Dashing%20Away.png"
+                alt="Dashing Away"
+                width="60"
+                height="60"
+              />
             </div>
           </div>
         </div>
