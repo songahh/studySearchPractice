@@ -5,6 +5,13 @@ import { ref } from 'vue'
 const props = defineProps({ item: Object })
 const openOrClosed = ref('모집중')
 if (!props.item.open) openOrClosed.value = '모집완료'
+
+function dateConverter() {
+  // 1시간 이내 -> *분 전
+  // 24시간 이내 ->  *시간 전
+  // 1주일 이내 -> *일 전
+  //
+}
 </script>
 
 <template>
@@ -15,7 +22,7 @@ if (!props.item.open) openOrClosed.value = '모집완료'
           ><img
             class="relative inline-block h-8 w-8 rounded-full object-cover object-center"
             alt="프로필 이미지"
-            :src="item.user_img"
+            :src="item.userImg"
           />
           {{ item.nickname }} ・ {{ item.createdTime }}</span
         >
@@ -24,19 +31,26 @@ if (!props.item.open) openOrClosed.value = '모집완료'
         <div class="flex">
           <div
             class="text-sm center relative inline-block select-none whitespace-nowrap rounded-lg bg-blue-500 py-2 px-3.5 align-baseline font-sans font-bold uppercase leading-none text-white"
+            v-if="openOrClosed == '모집중'"
+          >
+            {{ openOrClosed }}
+          </div>
+          <div
+            class="text-sm center relative inline-block select-none whitespace-nowrap rounded-lg bg-gray-400 py-2 px-3.5 align-baseline font-sans font-bold uppercase leading-none text-white"
+            v-else
           >
             {{ openOrClosed }}
           </div>
           <h4 class="px-2 text-xl font-bold" id="subject">{{ item.subject }}</h4>
         </div>
-        <p id="content" class="text-ellipsis overflow-hidden my-2" style="max-height: 50px">
+        <p id="content" class="text-ellipsis overflow-hidden my-2" style="height: 40px">
           {{ item.content }}
         </p>
         <div id="tag" class="my-1">
           <BoardTagItemComponent v-for="tag in item.tag" :key="tag" :tag="tag" />
         </div>
       </div>
-      <div class="flex items-center justify-end py-1">
+      <div class="flex items-center justify-end py-1 px-4">
         <span>
           <svg
             xmlns="http://www.w3.org/2000/svg"

@@ -10,7 +10,7 @@ defineProps({ pageInfo: Object })
       >
         &lt;
       </div>
-      <div class="text-slate-500">{{ pageInfo.currPage }} / {{ pageInfo.totalPage }}</div>
+      <div class="text-slate-500">{{ pageInfo.currPage + 1 }} / {{ pageInfo.totalPage }}</div>
       <div
         class="border rounded-md bg-gray-100 px-2 py-1 text-2xl leading-6 text-slate-400 transition hover:bg-gray-200 hover:text-slate-500 cursor-pointer shadow-sm"
       >
