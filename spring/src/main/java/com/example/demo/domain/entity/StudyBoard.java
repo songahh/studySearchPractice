@@ -1,6 +1,5 @@
-package com.example.demo.domain;
+package com.example.demo.domain.entity;
 
-import com.example.demo.config.BaseTimeEntity;
 import java.util.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;

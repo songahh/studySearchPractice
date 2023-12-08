@@ -2,6 +2,8 @@ package com.example.demo.domain;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
+import com.example.demo.domain.entity.StudyBoard;
+import com.example.demo.domain.entity.Tag;
 import com.querydsl.core.types.dsl.*;
 
 import com.querydsl.core.types.PathMetadata;

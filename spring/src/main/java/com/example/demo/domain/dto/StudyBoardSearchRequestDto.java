@@ -12,7 +12,6 @@ import java.util.*;
 @ToString
 public class StudyBoardSearchRequestDto {
     private String word;
-    private String nickname;
     private String orderby;
     private Boolean open;
     private List<String> tags = new ArrayList<>();
