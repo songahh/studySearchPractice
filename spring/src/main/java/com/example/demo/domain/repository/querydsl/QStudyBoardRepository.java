@@ -4,9 +4,14 @@ import com.example.demo.domain.*;
 import com.example.demo.domain.dto.StudyBoardSearchRequestDto;
 import com.example.demo.domain.dto.StudyBoardSearchResponseDto;
 import com.example.demo.domain.entity.StudyBoard;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.*;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -36,12 +41,19 @@ public class QStudyBoardRepository {
                 .join(studyBoardHasTag).on(studyBoard.id.eq(studyBoardHasTag.studyBoard.id))
                 .join(tag).on(tag.tagId.eq(studyBoardHasTag.tag.tagId))
                 .where(
-                        isOpen(searchDto.getOpen()),
-                        containsTagInTagList(tagList),
-                        containsQuery(searchDto.getWord())
+                        studyBoard.id.in(
+                                JPAExpressions.select(studyBoard.id)
+                                        .from(studyBoard)
+                                        .join(studyBoardHasTag).on(studyBoard.id.eq(studyBoardHasTag.studyBoard.id))
+                                        .join(tag).on(tag.tagId.eq(studyBoardHasTag.tag.tagId))
+                                        .where(
+                                                isOpen(searchDto.getOpen()),
+                                                containsQuery(searchDto.getWord()),
+                                                containsTagInTagList(tagList)
+                                        )
+                        )
                 )
                 .groupBy(studyBoard.id)
-                .having(checkTagSize(tagList))
                 .fetchCount();
 
         return totalPage;
@@ -56,6 +68,7 @@ public class QStudyBoardRepository {
 
         Set<String> tagList = searchDto.getTagList();
 
+
         JPAQuery<StudyBoardSearchResponseDto> query = queryFactory.select(Projections.constructor(StudyBoardSearchResponseDto.class,
                 studyBoard.id.as("id"), user.id.as("userId"), user.nickName.as("nickName"), studyBoard.createdDate.as("createdTime")
                         , studyBoard.open.as("open"), studyBoard.subject.as("subject"), studyBoard.content.as("content"),
@@ -67,20 +80,29 @@ public class QStudyBoardRepository {
                 .join(studyBoardHasTag).on(studyBoard.id.eq(studyBoardHasTag.studyBoard.id))
                 .join(tag).on(tag.tagId.eq(studyBoardHasTag.tag.tagId))
                 .where(
-                        isOpen(searchDto.getOpen()),
-                        containsTagInTagList(tagList),
-                        containsQuery(searchDto.getWord())
+                        studyBoard.id.in(
+                                JPAExpressions.select(studyBoard.id)
+                                        .from(studyBoard)
+                                        .join(studyBoardHasTag).on(studyBoard.id.eq(studyBoardHasTag.studyBoard.id))
+                                        .join(tag).on(tag.tagId.eq(studyBoardHasTag.tag.tagId))
+                                        .where(
+                                                isOpen(searchDto.getOpen()),
+                                                containsQuery(searchDto.getWord()),
+                                                containsTagInTagList(tagList)
+                                        )
+                        )
                 )
                 .groupBy(studyBoard.id)
-                .having(checkTagSize(tagList))
-                .orderBy(
-                        getPath(searchDto.getOrderby())
-                )
-                .orderBy(studyBoard.id.desc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize());
+                .orderBy(getPath(searchDto.getOrderby()));
 
-        List<StudyBoardSearchResponseDto> responseDto = query.fetch();
+        if(tagList!=null && !tagList.isEmpty()){
+            query = query.orderBy(getTagSize(tagList));
+        }
+
+        List<StudyBoardSearchResponseDto> responseDto = query.orderBy(studyBoard.id.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize()).fetch();
+
         Long totalPage = countAll(pageable, searchDto, tagList);
         log.info("StudyBoard findAll 결과.............{},{}", responseDto,totalPage);
         return new PageImpl<>(responseDto, pageable, totalPage);
@@ -90,7 +112,10 @@ public class QStudyBoardRepository {
         if (tagList==null || tagList.isEmpty()) {
             return null;
         }
-        return Expressions.numberTemplate(Integer.class, "count(distinct {0})", QTag.tag.tagName).eq(tagList.size());
+        return Expressions.numberTemplate(Integer.class, "count(distinct {0})", QTag.tag.tagName).gt(tagList.size());
+    }
+    private OrderSpecifier<?> getTagSize(Set<String> tagList){
+        return new OrderSpecifier<>(com.querydsl.core.types.Order.DESC, Expressions.numberTemplate(Integer.class, "count(distinct {0})", QTag.tag.tagName));
     }
 
     private OrderSpecifier getPath(String column){
@@ -107,7 +132,8 @@ public class QStudyBoardRepository {
         if (taglist==null || taglist.isEmpty()) {
             return null;
         }
-        return QTag.tag.tagName.in(taglist);
+
+        return QStudyBoardHasTag.studyBoardHasTag.tag.tagName.in(taglist);
     }
 
     private BooleanExpression containsQuery(String query){
